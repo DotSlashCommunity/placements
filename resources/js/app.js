@@ -93,6 +93,7 @@ window.onload = function () {
         newCompany: null,
       },
 
+      syncing: false,
       registrations: [],
     },
 
@@ -126,11 +127,14 @@ window.onload = function () {
 
     pushStoreToState: function() {
       this.set('registrations', []);
+      this.set('syncing', true);
 
       fires.getAllEntries().then(dataStore => {
         var transformed = this.transformStoreToState(dataStore);
         for(var key of Object.keys(transformed))
           this.pushCompany(key, transformed[key]);
+
+        this.set('syncing', false);
       });
     },
 

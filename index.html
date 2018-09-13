@@ -96,8 +96,12 @@
               {{/if}}
 
               {{#if user.loggedIn && registrations.length === 0}}
-              <br/><br/><p class="placeholder-text has-text-centered">Please wait for a few seconds</p>
-                <p class="placeholder-text has-text-centered">No companies available yet</p>
+                <br/>
+                {{#if syncing }}
+                  <br/><p class="placeholder-text has-text-centered">Syncing, please wait for a few seconds...</p>
+                {{else}}
+                  <p class="placeholder-text has-text-centered">No companies open for registration.</p>
+                {{/if}}
               {{/if}}
 
               {{#each registrations}}
