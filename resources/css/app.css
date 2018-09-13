@@ -1,0 +1,43 @@
+html, body {
+  width: 100%;
+  height: 100%;
+
+  padding-top: 10px;
+  padding-bottom: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
+  margin: 0px;
+}
+
+.app-content {
+  padding-top: 20px;
+}
+
+.no-padding {
+  padding: 0px;
+}
+
+.little-top-padding {
+  padding-top: 4px;
+}
+
+.min-height-full {
+  min-height: 100%;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.no-borders {
+  border: none;
+  border-radius: 0px;
+}
+
+.placeholder-text {
+  color: gray;
+}
+
+.flex-spaced {
+  justify-content: space-between;
+}

@@ -1,0 +1,201 @@
+<html>
+  <head>
+    <title>DotSlash | Placements</title>
+
+    <!-- Meta Properties -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#222222">
+    <meta name="msapplication-navbutton-color" content="#222222">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#222222">
+
+    <!-- Need firebase before anything else -->
+    <script src="https://www.gstatic.com/firebasejs/5.4.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.4.2/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.3.0/firebase-firestore.js"></script>
+    <script>
+      firebase.initializeApp({
+        apiKey: "AIzaSyAeuF39PisvZmTLukMKtx48gJiQ6r5dJWU",
+        authDomain: "dotslash-placements.firebaseapp.com",
+        databaseURL: "https://dotslash-placements.firebaseio.com",
+        projectId: "dotslash-placements",
+        storageBucket: "dotslash-placements.appspot.com",
+        messagingSenderId: "580658859963"
+      });
+    </script>
+
+    <!-- Include all vendors -->
+    <link rel="stylesheet" href="./vendors/fonts/fontello-embedded.css" />
+    <link rel="stylesheet" href="./vendors/css/bulma.min.css" />
+    <script src="./vendors/js/ractive.min.js"></script>
+    <script src="./vendors/js/ractive.remove.js"></script>
+    <script src="./vendors/js/navigo.min.js"></script>
+
+    <!-- Include resource  -->
+    <link rel="stylesheet" href="./resources/css/app.css" />
+    <script src="./resources/js/app.csv-export.js"></script>
+    <script src="./resources/js/app.js"></script>
+    <script src="./resources/js/app.firebase.js"></script>
+  </head>
+
+  <body id="container">
+    <script id="template" type="text/ractive">
+      <div class="container min-height-full">
+        <nav class="navbar is-transparent">
+          <div class="navbar-brand flex-spaced">
+            <a class="navbar-item" href="#">
+              <img src="resources/images/dotSlash.png" width="112" height="28">
+            </a>
+            <div class="navbar-item is-hidden-desktop-only is-hidden-widescreen-only">
+              <a class="button is-primary" on-click="reloadWithAdmin()">
+                <span>Admin</span>
+              </a>
+            </div>
+          </div>
+
+          {{#if !admin.loggedIn}}
+            <div class="navbar-menu is-hidden-mobile is-hidden-tablet-only">
+              <div class="navbar-end">
+                <div class="navbar-item is-expanded">
+                  <a class="button is-primary" on-click="reloadWithAdmin()">
+                    <span>Admin</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          {{/if}}
+        </nav>
+
+        <div class="container app-content">
+          <div class="columns is-centered">
+            <div class="column is-half-tablet is-two-fifths-desktop">
+              {{#if admin.loggedIn}}
+                <div class="card">
+                  <header class="card-header">
+                    <p class="card-header-title">
+                      Add Company
+                    </p>
+                  </header>
+
+                  <footer class="card-footer">
+                    <div class="field has-addons full-width">
+                      <div class="control is-expanded">
+                        <input class="input no-borders" type="text" placeholder="Company" value='{{admin.newCompany}}'>
+                      </div>
+                      <div class="control">
+                        <button class="button is-primary no-borders" on-click='@this.addCompany()'>Done</button>
+                      </div>
+                    </div>
+                  </footer>
+                </div><br/><br/>
+              {{/if}}
+
+              {{#if !user.loggedIn && user.loginFailed}}
+                <br/><br/><p class="placeholder-text has-text-centered">Please wait while we log you in...</p>
+              {{elseif user.loginFailed}}
+                <br/><br/><p class="placeholder-text has-text-centered">Login Failed</p>
+              {{/if}}
+
+              {{#if user.loggedIn && registrations.length === 0}}
+              <br/><br/><p class="placeholder-text has-text-centered">Please wait for a few seconds</p>
+                <p class="placeholder-text has-text-centered">No companies available yet</p>
+              {{/if}}
+
+              {{#each registrations}}
+                <div class="card">
+                  <header class="card-header">
+                    <p id="{{ @this.anchorStr(company) }}" class="card-header-title">
+                      {{company}}
+                    </p>
+                    {{#if admin.loggedIn}}
+                      <a class="card-header-icon" on-click="@this.deleteCompany(@keypath)">
+                        <span class="icon">
+                          <i class="icon-trash"></i>
+                        </span>
+                      </a>
+                      <a class="card-header-icon" on-click="@this.export(@keypath)">
+                        <span class="icon">
+                          <i class="icon-download"></i>
+                        </span>
+                      </a>
+                    {{/if}}
+                  </header>
+                  <div class="card-content no-padding">
+                    <div class="content no-padding little-top-padding">
+                      <table class="table is-fullwidth is-hoverable is-striped">
+                        <tbody>
+                          {{#if entries.length == 0}}
+                            <tr>
+                              <td class="placeholder-text has-text-centered">No Registrations Yet.</td>
+                            </tr>
+                          {{else}}
+                            {{#each entries: num}}
+                              <tr>
+                                <th>{{ num+1 }}</th>
+                                <td>{{name}}</td>
+                              </tr>
+                            {{/each}}
+                          {{/if}}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <footer class="card-footer">
+                    {{#if registering}}
+                      <div class="field has-addons full-width">
+                        <div class="control is-expanded">
+                          <input class="input no-borders" type="text" placeholder="Your name" value='{{nameSelf}}'>
+                        </div>
+                        <div class="control">
+                          <button class="button is-primary no-borders" on-click='registerSelf(@context)'>Done</button>
+                        </div>
+                      </div>
+                    {{else}}
+                      <a class="card-footer-item" on-click="@context.set('registering', true)">＋ Register</a>
+                    {{/if}}
+                  </footer>
+                </div><br/><br/>
+              {{/each}}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" class-is-active="admin.modal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+          <div class="box">
+            <div class="field">
+              <p class="control">
+                <input class="input" class-is-danger="!admin.validations.email" type="email" placeholder="Email" value="{{admin.email}}">
+              </p>
+            </div>
+            <div class="field">
+              <p class="control">
+                <input class="input" class-is-danger="!admin.validations.password"  type="password" placeholder="Password" value="{{admin.password}}">
+              </p>
+            </div>
+            <div class="field">
+              <p class="control">
+                <button class="button is-success" on-click="loginAdmin()">
+                  Login
+                </button>
+                <button class="button is-light" on-click="adminCancelLogin()">
+                  Cancel
+                </button>
+              </p>
+            </div>
+          </div>
+        </div>
+        <button class="modal-close is-large" aria-label="close" on-click="adminCancelLogin()"></button>
+      </div>
+
+      <footer class="footer">
+        <div class="content has-text-centered">
+          <p>
+            Made with <font color='red'>💟</font> by <a href="http://dotslashcommunity.com">DotSlashCommunity</a>.
+          </p>
+        </div>
+      </footer>
+    </script>
+  </body>
+</html>
